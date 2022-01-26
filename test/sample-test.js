@@ -24,27 +24,77 @@ describe("Sploot NFTs", function () {
     expect(root).to.equal('0x'+merkle.rootHash.toString('hex'));
   })
 
-  it('Whitelisted account can mint', async () => {
-    const proof = merkle.merkleTree.getHexProof(keccak256(account1.address));
-    const options = {value: ethers.utils.parseEther("0.03")}
-    await sploot.connect(account1).mint(proof, options);
+  it('First allowlisted account can mint for free', async () => {
+    const [allowedAmount, free] = merkle.allowlist[account1.address]
+    const leaf = merkle.generateLeaf(account1.address, allowedAmount, free)
+    const proof = merkle.merkleTree.getHexProof(leaf)
+    const options = {value: ethers.utils.parseEther("0")}
+    await sploot.connect(account1).mint(proof, allowedAmount, free, 1, options);
   })
 
-  it('Whitelisted account cannot mint twice', async () => {
-    const proof = merkle.merkleTree.getHexProof(keccak256(account1.address));
-    const options = {value: ethers.utils.parseEther("0.06")}
+  it('First allowlisted account cannot mint twice', async () => {
+    const [allowedAmount, free] = merkle.allowlist[account1.address]
+    const leaf = merkle.generateLeaf(account1.address, allowedAmount, free)
+    const proof = merkle.merkleTree.getHexProof(leaf)
+    const options = {value: ethers.utils.parseEther("0")}
     try {
-      await sploot.connect(account1).mint(proof, options);
+      await sploot.connect(account1).mint(proof, allowedAmount, free, 1, options);
     } catch (error) {
       expect(error).to.be.instanceOf(Error);
     }
   })
 
-  it('Unwhitelisted account can not mint', async () => {
-    const proof = merkle.merkleTree.getHexProof(keccak256(account3.address));
+  it('First allowlisted account cannot mint twice even when lying', async () => {
+    const [allowedAmount, free] = merkle.allowlist[account1.address]
+    const leaf = merkle.generateLeaf(account1.address, 2, free)
+    const proof = merkle.merkleTree.getHexProof(leaf)
+    const options = {value: ethers.utils.parseEther("0")}
+    try {
+      await sploot.connect(account2).mint(proof, 2, free, 1, options);
+    } catch (error) {
+      expect(error).to.be.instanceOf(Error);
+    }
+  })
+
+  it('Second allowlisted account cannot mint for free', async () => {
+    const [allowedAmount, free] = merkle.allowlist[account2.address]
+    const leaf = merkle.generateLeaf(account2.address, allowedAmount, free)
+    const proof = merkle.merkleTree.getHexProof(leaf)
+    const options = {value: ethers.utils.parseEther("0")}
+    try {
+      await sploot.connect(account2).mint(proof, allowedAmount, free, 1, options);
+    } catch (error) {
+      expect(error).to.be.instanceOf(Error);
+    }
+  })
+
+  it('Second allowlisted account can mint two when paid for', async () => {
+    const [allowedAmount, free] = merkle.allowlist[account2.address]
+    const leaf = merkle.generateLeaf(account2.address, allowedAmount, free)
+    const proof = merkle.merkleTree.getHexProof(leaf)
+    const options = {value: ethers.utils.parseEther("0.12")}
+    await sploot.connect(account2).mint(proof, allowedAmount, free, 2, options);
+  })
+
+  it('But it cannot mint another one', async () => {
+    const [allowedAmount, free] = merkle.allowlist[account2.address]
+    const leaf = merkle.generateLeaf(account2.address, allowedAmount, free)
+    const proof = merkle.merkleTree.getHexProof(leaf)
     const options = {value: ethers.utils.parseEther("0.06")}
     try {
-      const result = await sploot.connect(account3).mint(proof, options);
+      await sploot.connect(account2).mint(proof, allowedAmount, free, 1, options);
+    } catch (error) {
+      expect(error).to.be.instanceOf(Error);
+    }
+  })
+
+  it('Non allowlisted account cannot mint', async () => {
+    const [allowedAmount, free] = [2, true]
+    const leaf = merkle.generateLeaf(account2.address, allowedAmount, free)
+    const proof = merkle.merkleTree.getHexProof(leaf)
+    const options = {value: ethers.utils.parseEther("0.06")}
+    try {
+      await sploot.connect(account3).mint(proof, allowedAmount, free, 1, options);
     } catch (error) {
       expect(error).to.be.instanceOf(Error);
     }
@@ -62,10 +112,33 @@ describe("Sploot NFTs", function () {
     await sploot.connect(admin).openToPublic(true);
   })
 
-  it('Unwhitelisted account can now mint', async () => {
-    const proof = merkle.merkleTree.getHexProof(keccak256(account3.address));
+  it('Non allowlisted account can now mint', async () => {
+    const [allowedAmount, free] = [2, true]
+    const leaf = merkle.generateLeaf(account3.address, allowedAmount, free)
+    const proof = merkle.merkleTree.getHexProof(leaf)
     const options = {value: ethers.utils.parseEther("0.06")}
-    await sploot.connect(account3).mint(proof, options);
+    await sploot.connect(account3).mint(proof, allowedAmount, free, 1, options);
+  })
+
+  it('First allowlisted account cannot for free', async () => {
+    const [allowedAmount, free] = merkle.allowlist[account1.address]
+    const leaf = merkle.generateLeaf(account1.address, allowedAmount, free)
+    const proof = merkle.merkleTree.getHexProof(leaf)
+    const options = {value: ethers.utils.parseEther("0")}
+    try {
+      await sploot.connect(account1).mint(proof, allowedAmount, free, 1, options);
+      expect.fail()
+    } catch (error) {
+      expect(error).to.be.instanceOf(Error);
+    }
+  })
+
+  it('First allowlisted account can now mint if paid for', async () => {
+    const [allowedAmount, free] = merkle.allowlist[account1.address]
+    const leaf = merkle.generateLeaf(account1.address, allowedAmount, free)
+    const proof = merkle.merkleTree.getHexProof(leaf)
+    const options = {value: ethers.utils.parseEther("0.06")}
+    await sploot.connect(account1).mint(proof, allowedAmount, free, 1, options);
   })
   
 });

@@ -12,7 +12,7 @@ contract Sploot is ERC721, Ownable {
     uint private burnTracker;
 
     bytes32 public merkleRoot;
-    mapping(address => bool) public whitelistClaimed;
+    mapping(address => uint) public allowlistClaimed;
 
     string private _baseTokenURI;
     uint private constant maxMints = 3000;
@@ -35,21 +35,24 @@ contract Sploot is ERC721, Ownable {
         _baseTokenURI = baseURI;
     }
 
-    function mint(bytes32[] calldata proof) public payable {
+    function mint(bytes32[] calldata proof, uint256 allowedAmount, bool free, uint mintAmount) public payable {
         require(!paused || msg.sender == owner());
+        require(mintTracker+mintAmount <= maxMints, "That exceeds the max amount of NFTs");
 
-        require(!whitelistClaimed[msg.sender], "address has already claimed");
-        bytes32 leaf = keccak256(abi.encodePacked(msg.sender, false));
-        console.log("Leaf is %s and encodePacked is", msg.sender);
-        require(MerkleProof.verify(proof, merkleRoot, leaf) || msg.sender == owner() || open, "Minter is not whitelisted.");
-        whitelistClaimed[msg.sender] = true;
+        require((allowlistClaimed[msg.sender] + mintAmount) <= allowedAmount || open, "Address can not mint that many."); //Make sure they haven't used up their mints
+        require(MerkleProof.verify(proof, merkleRoot, getLeaf(msg.sender, allowedAmount, free))|| open, "Minter is not allowlisted."); //Make sure their address, allowed amount, and if they have to pay matches the allowlist
+        require(msg.value == mintPrice*mintAmount || (free && !open), "It costs 0.06 eth to mint a Sploot.");
 
-        require(msg.value == mintPrice
-         || msg.sender == owner(),
-          "It costs 0.06 eth to mint a Sploot.");
-        require(mintTracker < maxMints, "No more can be minted.");
-        mintTracker++;
-        _mint(msg.sender, mintTracker);
+        allowlistClaimed[msg.sender] = allowlistClaimed[msg.sender] + mintAmount; //Update how many they have minted
+        
+        for (uint256 i = 0; i < mintAmount; i++) {
+            _mint(msg.sender, mintTracker+i);
+        }
+        mintTracker = mintTracker+mintAmount;
+    }
+
+    function getLeaf(address addr, uint256 amount, bool free) public pure returns(bytes32) {
+        return keccak256(abi.encodePacked(addr, amount, free));
     }
 
     function adminMint(uint amount) public onlyOwner {
