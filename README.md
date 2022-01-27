@@ -1,15 +1,16 @@
-# Basic Sample Hardhat Project
+# Sploot contract hardhat configuration
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts.
+The sploot contract allowing for minting if an address is on the allowlist.
 
-Try running some of the following tasks:
+The allowlist itself is hosted in the merkle.js file
 
-```shell
-npx hardhat accounts
-npx hardhat compile
-npx hardhat clean
+
+The test is broken atm due to the public test having to change the allowlist, but to try it you can run:
+```
 npx hardhat test
-npx hardhat node
-node scripts/sample-script.js
-npx hardhat help
+```
+
+To start the server hosting the mint site, run:
+```
+node .
 ```
