@@ -8,7 +8,11 @@
     "hardhat": "^2.8.2"
   },
   "dependencies": {
+    "@nomiclabs/hardhat-etherscan": "^3.0.0",
     "@openzeppelin/contracts": "^4.4.2",
+    "body-parser": "^1.19.1",
+    "express": "^4.17.2",
+    "hardhat-etherscan": "^1.0.1",
     "keccak256": "^1.0.6",
     "merkletreejs": "^0.2.27"
   }

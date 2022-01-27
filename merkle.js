@@ -4,11 +4,11 @@ const { ethers } = require("hardhat");
 
 const allowlist = {
     //Address, how many they are allowed to mint, and if they can mint it for free or not
-    '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266' : [5, true],
-    '0x70997970C51812dc3A010C7d01b50e0d17dc79C8' : [1, true],
-    '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC' : [2, false],
-    '0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB' : [1, false],
-    '0x617F2E2fD72FD9D5503197092aC168c91465E7f2' : [1, false]
+    '0x7341A5e001AF4f53Faba168e8d0406dea2587A3D' : [2, true],
+    '0xE0666cAC0C2267209Ba3Da4Db00c03315Fe64fA8' : [3, false],
+    '0x7c7d093b4Fb96C89fcC29cD4c24c15DB0ed669dF' : [5, false],
+    '0x9DDf691De5e1F4f7764262Be936B61f46d9f9d70' : [4, true],
+    '0xC1D91798d36e4A14ebF08208287302A597d7E759' : [1, false]
 }
 
 const leafNodes = Object.keys(allowlist).map(k => generateLeaf(k, allowlist[k][0], allowlist[k][1]));
@@ -18,6 +18,8 @@ const rootHash = merkleTree.getRoot();
 function generateLeaf(address, amount, free) {
     return ethers.utils.solidityKeccak256(['address', 'uint256', 'bool'], [address, amount, free]);
 }
+
+console.log(rootHash.toString('hex'))
 
 module.exports = {
     leafNodes: leafNodes,
