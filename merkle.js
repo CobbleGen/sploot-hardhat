@@ -4,6 +4,8 @@ const { ethers } = require("hardhat");
 
 const allowlist = {
     //Address, how many they are allowed to mint, and if they can mint it for free or not
+    '0x70997970C51812dc3A010C7d01b50e0d17dc79C8' : [1, true],
+    '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC' : [2, false],
     '0x7341A5e001AF4f53Faba168e8d0406dea2587A3D' : [2, true],
     '0xE0666cAC0C2267209Ba3Da4Db00c03315Fe64fA8' : [3, false],
     '0x7c7d093b4Fb96C89fcC29cD4c24c15DB0ed669dF' : [5, false],

@@ -20,7 +20,7 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
  */
 module.exports = {
   solidity: "0.8.4",
-  defaultNetwork: "ropsten",
+  defaultNetwork: "localhost",
   networks: {
     ropsten: {
       url: "https://ropsten.infura.io/v3/60a2636c7c094ce2a93c984ce4c0b20f",
