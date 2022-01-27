@@ -18,3 +18,4 @@ To start the server hosting the mint site, run:
 ```
 node .
 ```
+This site interacts with the contract hosted on the ropsten network, which can be found here: https://ropsten.etherscan.io/address/0x1EBC5ffF401435521049fC10E7B485EB5146D5D0#code
