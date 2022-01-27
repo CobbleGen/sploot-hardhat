@@ -37,6 +37,7 @@ contract Sploot is ERC721, Ownable {
 
     function mint(bytes32[] calldata proof, uint256 allowedAmount, bool free, uint mintAmount) public payable {
         require(!paused || msg.sender == owner());
+        require(mintAmount > 0, "You have to mint at least 1 NFT");
         require(mintTracker+mintAmount <= maxMints, "That exceeds the max amount of NFTs");
 
         require((allowlistClaimed[msg.sender] + mintAmount) <= allowedAmount || open, "Address can not mint that many."); //Make sure they haven't used up their mints
