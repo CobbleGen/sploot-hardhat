@@ -35,7 +35,12 @@ contract Sploot is ERC721, Ownable {
         _baseTokenURI = baseURI;
     }
 
-    function mint(bytes32[] calldata proof, uint256 allowedAmount, bool free, uint mintAmount) public payable {
+    modifier callerIsUser() {
+        require(tx.origin == msg.sender, "The caller is another contract");
+        _;
+    }
+
+    function mint(bytes32[] calldata proof, uint256 allowedAmount, bool free, uint mintAmount) public payable callerIsUser {
         require(!paused || msg.sender == owner());
         require(mintAmount > 0, "You have to mint at least 1 NFT");
         require(mintTracker+mintAmount <= maxMints, "That exceeds the max amount of NFTs");
@@ -57,6 +62,7 @@ contract Sploot is ERC721, Ownable {
     }
 
     function adminMint(uint amount) public onlyOwner {
+        require(mintTracker+amount <= maxMints, "That exceeds the max amount of NFTs");
         for (uint256 i = 0; i < amount; i++) {
             mintTracker++;
             _mint(msg.sender, mintTracker);
@@ -67,7 +73,7 @@ contract Sploot is ERC721, Ownable {
         merkleRoot = root;
     }
 
-    function pauseUnpause(bool p) public {
+    function pauseUnpause(bool p) public onlyOwner {
         paused = p;
     }
 
